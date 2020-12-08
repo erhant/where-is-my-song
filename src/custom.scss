@@ -1,0 +1,10 @@
+// Override default variables before the import
+
+// Spotify Colors
+$primary: #1db954;
+$success: #212121;
+$dark: #121212;
+$light: #b3b3b3;
+
+// Import Bootstrap and its default variables
+@import '~bootstrap/scss/bootstrap.scss';

@@ -45,4 +45,15 @@ export default class SpotifyAPI {
     })
   }
 
+  getTrack(trackId) {
+    return new Promise((resolve, reject) => {
+      axios.get("https://api.spotify.com/v1/tracks/"+trackId).then(data => {
+        resolve({
+          body: data.data,
+          statusCode: data.status,
+          headers: data.headers
+        })
+      }).catch(err => reject(err))
+    })
+  }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Jumbotron, Button, InputGroup, FormControl } from 'react-bootstrap'
+import { Jumbotron, Button, InputGroup, FormControl, Card } from 'react-bootstrap'
 
 function init(spotifyApi) {
   return new Promise(async (resolve, reject) => {
@@ -47,10 +47,11 @@ function extractTrackToPlaylistIds(userObject) {
   return t_p
 }
 
-function searchTrack(userObject, searchTrackURL) {
-  if (searchTrackURL.length < 79) return
-
-  let trackId = searchTrackURL.slice(31, 31 + 22) // todo very dangerous
+function parseTrackID(searchTrackURL) {
+  if (searchTrackURL.length < 79) return null
+  return searchTrackURL.slice(31, 31 + 22) // todo: very dangerous
+}
+function searchTrack(userObject, trackId) {
   console.log("Searching track id:", trackId)
   let resultingIds = userObject.trackToPlaylistIds[trackId] || []
   console.log("Found in:", resultingIds)
@@ -69,6 +70,7 @@ function playlistIdToObject(userObject, pid) {
 export default function Finder({ spotifyApi, ready }) {
   const [userObject, setUserObject] = useState(null)
   const [trackURL, setTrackURL] = useState("")
+  const [trackObject, setTrackObject] = useState(null)
   const [playlistObjects, setPlaylistObjects] = useState([])
 
   if (ready && !userObject) {
@@ -80,38 +82,59 @@ export default function Finder({ spotifyApi, ready }) {
     return null
   } else if (ready) {
     return (
-    <div>
-      <Jumbotron>
-        <h1 className="display-3 text-center">Welcome, {userObject.name}!</h1>
-        <p className="lead">
+    <div className="row">
+      <Jumbotron className="mt-5 mx-auto w-100" style={{backgroundColor: "rgba(255, 255, 255, 0.1)"}}>
+        <h1 className="display-4 text-white text-center text-white">Welcome, {userObject.name}!</h1>
+        <p className="lead text-white">
           Please enter a song URL below. Let's see which of your playlists have it!
         </p>
-        <InputGroup className="mb-3">
+        <InputGroup>
           <FormControl
-            placeholder="Paste track URL here"
+            style={{height: "50px"}} 
+            placeholder="https://open.spotify.com/track/2qWn2E1zg2BVaoWRGYw3vE?si=8TcoSxf_Qoq5VCVZuXl_qw"
             aria-label="trackURL"
             aria-describedby="trackURL"
             onChange={event => {setTrackURL(event.target.value)}} 
             value={trackURL}
           />
           <InputGroup.Append>
-            <Button variant="outline-success" onClick={e => {
-              let foundIds = searchTrack(userObject, trackURL)
-              if (foundIds.length === 0) {
-                setPlaylistObjects([])
-              } else {
-                setPlaylistObjects(foundIds.map(pid => playlistIdToObject(userObject, pid)))
-              }
-            }}>Search a track!</Button>
+            <Button style={{width: "70px", height: "50px"}} variant="primary" onClick={async e => {
+              let trackId = parseTrackID(trackURL)
+              if (trackId) {
+                let foundIds = searchTrack(userObject, trackId)
+                let trackObject = await spotifyApi.getTrack(trackId)
+                console.log("Track: ",trackObject)
+                setTrackObject(trackObject.body)
+                if (!foundIds || foundIds.length === 0) {
+                  setPlaylistObjects([])
+                } else {
+                  setPlaylistObjects(foundIds.map(pid => playlistIdToObject(userObject, pid)))
+                }
+              }              
+            }}><img src="/icons/mg.svg" alt="find me button" style={{width: "100%", height: "120%"}}/></Button>
           </InputGroup.Append>
         </InputGroup>
       </Jumbotron>
-      {playlistObjects.length > 0 ? playlistObjects.map((p, index) => 
-        <div className="bg-light mx-5 my-2">
-          <p className="lead">{p.name}</p>
-          <img src={p.images[0].url} alt="playlist" style={{width: "200px", height: "200px", objectFit: "cover"}}/>
-        </div>
-      ) : null}
+      <div className="d-flex flex-row justify-content-between flex-wrap text-center mb-3">
+        {trackObject ? <a className="text-decoration-none text-reset" target="_blank" rel="noopener noreferrer" href={trackObject.external_urls.spotify}>
+          <Card className="bg-light rounded text-wrap mx-1 m-4" style={{height: "300px", width: "300px"}}>
+            <Card.Img variant="top" className="mx-1 mt-1 rounded" src={trackObject.album.images[0].url} style={{width:"auto", height:"98%", objectFit:"cover"}}/>
+            <Card.Body>
+              <Card.Title className="text-white p-1 rounded" style={{backgroundColor: "rgba(255, 255, 255, 0.2"}}>{trackObject.name} - {trackObject.artists[0].name}</Card.Title>
+            </Card.Body>
+          </Card> 
+        </a> : null}
+        {playlistObjects.length > 0 ? playlistObjects.map((p, index) => 
+        <a key={`p_${index}`}className="text-decoration-none text-reset" target="_blank" rel="noopener noreferrer" href={p.external_urls.spotify}>
+          <Card className="bg-dark rounded text-wrap mx-1 mt-4 p-1 mb-5" style={{height: "300px", width: "300px"}}>
+            <Card.Img variant="top" className="mx-1 mt-1 rounded" src={p.images[0].url} style={{width:"auto", height:"98%", objectFit:"cover"}}/>
+            <Card.Body>
+              <Card.Title className="text-white p-1 rounded" style={{backgroundColor: "rgba(255, 255, 255, 0.2"}}>{p.name}</Card.Title>
+            </Card.Body>
+          </Card> 
+        </a>         
+        ) : null}
+      </div>
     </div>)
   }
     else return null
