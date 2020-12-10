@@ -5,7 +5,7 @@ function init(spotifyApi) {
   return new Promise(async (resolve, reject) => {
     // Get user
     let data
-    try {
+    try { 
       data = await spotifyApi.getMe()
     } catch (err) {reject(err)}
     let userObject = {
