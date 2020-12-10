@@ -21,30 +21,44 @@ function init(spotifyApi) {
       data = await spotifyApi.getMyPlaylists()
     } catch (err) {reject(err)}
     userObject.playlists = data.body.items
-
     let ptmp = userObject.playlists
-    let ptracks = await Promise.all(ptmp.map(p =>  spotifyApi.getHref(p.tracks.href)))
+
+    // Get tracks of the playlist
+    let ptracks
+    try {
+      ptracks = await Promise.all(ptmp.map(p => spotifyApi.getHref(p.tracks.href)))
+    } catch (err) {reject(err)}
+     
+    console.log("Ptracks:", ptracks)
+
     for (let p = 0; p < userObject.playlists.length; p++) {
-      userObject.playlists[p].tracks = ptracks[p].body.items
+      userObject.playlists[p].tracks = []
+      while (ptracks[p].body.next) {
+        userObject.playlists[p].tracks = userObject.playlists[p].tracks.concat(ptracks[p].body.items)
+        try {
+          ptracks[p] = await spotifyApi.getHref(ptracks[p].body.next)
+        } catch (err) {reject(err)}
+        
+      }
     }
+    
+    let t_p = {}
+    userObject.playlists.forEach(p => {
+      p.tracks.forEach(t => {
+        if (!!t_p[t.track.id]) {
+          t_p[t.track.id].push(p.id)        
+        } else {
+          t_p[t.track.id] = [p.id]
+        }
+        
+      })
+    })
+    userObject.trackToPlaylistIds = t_p
+
     console.log(userObject)
     resolve(userObject)
+    
   })
-}
-
-function extractTrackToPlaylistIds(userObject) {
-  let t_p = {}
-  userObject.playlists.forEach(p => {
-    p.tracks.forEach(t => {
-      if (!!t_p[t.track.id]) {
-        t_p[t.track.id].push(p.id)        
-      } else {
-        t_p[t.track.id] = [p.id]
-      }
-      
-    })
-  })
-  return t_p
 }
 
 function parseTrackID(searchTrackURL) {
@@ -74,12 +88,12 @@ export default function Finder({ spotifyApi, ready }) {
   const [playlistObjects, setPlaylistObjects] = useState([])
 
   if (ready && !userObject) {
-    init(spotifyApi).then(userObj => {
-      let t_p = extractTrackToPlaylistIds(userObj)
-      userObj.trackToPlaylistIds = t_p
-      setUserObject(userObj)
-    }).catch(err => console.log("Error!", err))
-    return null
+    init(spotifyApi).then(userObj => setUserObject(userObj)).catch(err => console.log("Error!", err))
+    return (<div className="row">
+      <Jumbotron className="mt-5 mx-auto w-100" style={{backgroundColor: "rgba(255, 255, 255, 0.1)"}}>
+        <h1 className="display-4 text-white text-center text-white">Fetching your playlists, please wait...</h1>
+      </Jumbotron>
+    </div>)
   } else if (ready) {
     return (
     <div className="row">
