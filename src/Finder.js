@@ -125,7 +125,7 @@ export default function Finder({ spotifyApi, ready }) {
                   setPlaylistObjects(foundIds.map(pid => playlistIdToObject(userObject, pid)))
                 }
               }              
-            }}><img src="/icons/mg.svg" alt="find me button" style={{width: "100%", height: "120%"}}/></Button>
+            }}><img src="where-is-my-song/icons/mg.svg" alt="find me button" style={{width: "100%", height: "120%"}}/></Button>
           </InputGroup.Append>
         </InputGroup>
       </Jumbotron>

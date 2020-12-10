@@ -1,6 +1,7 @@
 import './custom.scss'
 
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -10,9 +11,11 @@ import "bootstrap/dist/js/bootstrap.min.js";
 ///import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Router basename={process.env.PUBLIC_URL}>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </Router>,
   document.getElementById('root')
 );
 

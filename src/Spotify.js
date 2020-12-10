@@ -36,6 +36,7 @@ export default class SpotifyAPI {
   getHref(href) {
     return new Promise((resolve, reject) => {
       axios.get(href).then(data => {
+        if (data.status)
         resolve({
           body: data.data,
           statusCode: data.status,

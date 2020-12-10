@@ -14,8 +14,9 @@ function getRandomIntInclusive(max) {
 function App() {
   const [spotifyApi, setSpotifyApi] = useState(null)
   const [ready, setReady] = useState(false)
+  
   return (
-    <div style={{backgroundImage: `url(/bg/background-${getRandomIntInclusive(10)}.png)`, backgroundRepeat: "no-repeat", height: "100vh", backgroundSize: "cover"}}>
+    <div style={{backgroundImage: `url(where-is-my-song/bg/background-${getRandomIntInclusive(10)}.png)`, backgroundRepeat: "no-repeat", height: "100vh", backgroundSize: "cover"}}>
 
       {ready ? <div className="container">
             <Finder spotifyApi={spotifyApi} ready={true}/> 
