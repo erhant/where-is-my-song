@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import SpotifyLogin from 'react-spotify-login';
 import Finder from './Finder'
-import SpotifyApi from './Spotify';
+import SpotifyApi from './Spotify'; 
 
 const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID
 const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET
