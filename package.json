@@ -1,5 +1,6 @@
 {
   "name": "where-is-my-song",
+  "homepage" : "https://erhant.github.io/where-is-my-song",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
